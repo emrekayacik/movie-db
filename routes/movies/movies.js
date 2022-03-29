@@ -23,14 +23,14 @@ router.post('/', async (req,res) => {
         rating: movieObj.rating
     });
     try{
-        const savedPost = await movie.save();
-        res.json(savedPost); // see returned data from promise in the screen
+        const savedMovie = await movie.save();
+        res.json(savedMovie); // see returned data from promise in the screen
     }catch(err){
         res.json({message: err});
     }
 });
 
-// GET A SPESIFIC POST
+// GET A SPESIFIC MOVIE
 router.get('/:movieId', (req,res) => { // /:5 ---> movies/5
     Movie.findById(req.params.movieId)
         .then(movie => { // PROMISE, we can use either async-await
@@ -41,7 +41,7 @@ router.get('/:movieId', (req,res) => { // /:5 ---> movies/5
         });
 });
 
-// DELETE A SPESIFIC POST
+// DELETE A SPESIFIC MOVIE
 router.delete('/:movieId', async (req,res) => {
     try{
         const movieToDelete = await Movie.remove({_id: req.params.movieId})
@@ -51,7 +51,7 @@ router.delete('/:movieId', async (req,res) => {
     }
 });
 
-// UPDATE A SPESIFIC POST
+// UPDATE A SPESIFIC MOVIE
 router.patch('/:movieId', (req,res) => {
     Movie.findByIdAndUpdate(
                             {_id: req.params.movieId},
