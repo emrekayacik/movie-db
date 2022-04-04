@@ -11,12 +11,14 @@ const cors = require('cors'); // for CORS-POLICY
 
 // routes
 const movieRoute = require('./routes/movies/movies');
+const categoryRoute = require('./routes/categories/categories');
 
 // using body-parser for the requests
 app.use(bodyParser.json());
 app.use(cors()); // for CORS-POLICY
+//use routes
 app.use('/movies',movieRoute);
-
+app.use('/categories',categoryRoute);
 
 app.get('/', (req,res) => {
     res.send('HomePage')

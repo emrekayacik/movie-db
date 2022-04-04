@@ -1,39 +1,31 @@
-const { response, Router } = require('express');
 const express = require('express');
-const MovieModel = require('../../models/MovieModel');
 const router = express.Router();
-const Movie = require('../../models/MovieModel')
+const MovieModel = require('../../models/MovieModel');
+
 
 // GET ALL MOVIES
-router.get('/', async (req,res) => {
-    try{
-        const movies = await Movie.find();
-        res.json(movies);
-    }catch(err){
-        res.json({message: err})
-    }
+router.get('/', (req,res) => {
+    MovieModel.find()
+    .then(movie=>res.json(movie))
+    .catch(err=>res.json({message:err}));
 });
 
 // ADD A MOVIE
 router.post('/', async (req,res) => {
-    const movieObj = req.body;
     const movie = new MovieModel({
-        title: movieObj.title,
-        description: movieObj.description,
-        rating: movieObj.rating
+        title: req.body.title,
+        description: req.body.description,
+        rating: req.body.rating
     });
-    try{
-        const savedMovie = await movie.save();
-        res.json(savedMovie); // see returned data from promise in the screen
-    }catch(err){
-        res.json({message: err});
-    }
+    movie.save()
+    .then(movie=>res.json(movie))
+    .catch(err=>res.json({message:err}));
 });
 
 // GET A SPESIFIC MOVIE
 router.get('/:movieId', (req,res) => { // /:5 ---> movies/5
-    Movie.findById(req.params.movieId)
-        .then(movie => { // PROMISE, we can use either async-await
+    MovieModel.findById(req.params.movieId)
+        .then(movie => { // PROMISE, we can use either async-await or promise
             res.json(movie);
         })
         .catch(err => {
@@ -43,20 +35,17 @@ router.get('/:movieId', (req,res) => { // /:5 ---> movies/5
 
 // DELETE A SPESIFIC MOVIE
 router.delete('/:movieId', async (req,res) => {
-    try{
-        const movieToDelete = await Movie.remove({_id: req.params.movieId})
-        res.json(`Successfully deleted: ${movieToDelete.title}`);
-    }catch(err){
-        res.json({message: err})
-    }
+    MovieModel.findByIdAndRemove(req.params.movieId)
+    .then(movie=>res.json(`Successfully deleted: ${movie.title}`))
+    .catch(err=>res.json({message:err}))
 });
 
 // UPDATE A SPESIFIC MOVIE
 router.patch('/:movieId', (req,res) => {
-    Movie.findByIdAndUpdate(
+    MovieModel.findByIdAndUpdate(
                             {_id: req.params.movieId},
                             // setting up new object, for the given id
-                            { $set: {title: req.body.title,description: req.body.description}}
+                            { $set: {title: req.body.title,description: req.body.description,rating:req.body.rating}}
                     )
                 .then(movie => {
                     res.json(`Old movie: ${movie} New movie description: ${req.body.description}`)
