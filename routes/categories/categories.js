@@ -1,5 +1,7 @@
 const express = require('express');
 const router = express.Router();
+const verify = require('../auth/verifyToken');
+const User = require('../../models/UserModel');
 
 const CategoryModel = require('../../models/CategoryModel');
 
@@ -15,30 +17,35 @@ router.get('/:categoryId',(req,res)=>{
     .catch(err=>res.json({message:err}));
 });
 
-router.post('/',(req,res)=>{
+router.post('/',verify,async (req,res)=>{
     const category = new CategoryModel({
         name: req.body.name,
         description: req.body.description,
         movies: req.body.movies
     });
+    const currentUser = await User.findById(req.user._id);
+    
     category.save()
-    .then(savedCategory=>res.json(savedCategory))
+    .then(savedCategory=>res.json({"SavedCategory": savedCategory,
+                                   "SavingUser": currentUser}))
     .catch(err=>res.json({message: err}));
 });
 
-router.delete('/:categoryId',(req,res)=>{
+router.delete('/:categoryId',verify,async (req,res)=>{
+    const currentUser = await User.findById(req.user._id);
     CategoryModel.findByIdAndRemove(req.params.categoryId)
-    .then(deletedCategory=>res.json(`Successfully deleted: ${deletedCategory}`))
+    .then(deletedCategory=>res.json({"DeletedCategory": deletedCategory,
+                                      "DeletingUser": currentUser}))
     .catch(err=>res.json({message:err}))
 });
 
-router.patch('/:categoryId',(req,res)=>{
+router.patch('/:categoryId',verify,(req,res)=>{
     CategoryModel.findByIdAndUpdate(
                             {_id: req.params.categoryId},
                             { $set: {name: req.body.name,description: req.body.description,movies:req.body.movies}}
                     )
                 .then(category => {
-                    res.json(`Old category: ${category} New category: ${req.body.name} - ${req.body.description} - ${req.body.movies}`)
+                    res.json({"NewCategory": req.body,"PatchingUser":req.user})
                 })
                 .catch(err => res.json({message: err}))
 });
